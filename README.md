@@ -28,11 +28,11 @@
 
 ### Multi-Query
 
-`XRAG` 中实现了 `Multi Query` 增大相关文本被检索到的概率, 实现逻辑可以参考: [`query_engine.py`](./XRAG/chatbot/query_engine.py)
+`XRAG` 中实现了 `Multi Query` 增大相关文本被检索到的概率, 实现逻辑可以参考: [`query_engine.py`](./chatbot/query_engine.py)
 
 ### HyPE
 
-`XRAG` 实现 `HyPE`(虚拟文档生成), 利用虚拟文档实现对于文本相关内容的检索, 实现逻辑可以参考: [`retriever.py`](./XRAG/ingestion/retriever.py)
+`XRAG` 实现 `HyPE`(虚拟文档生成), 利用虚拟文档实现对于文本相关内容的检索, 实现逻辑可以参考: [`retriever.py`](./ingestion/retriever.py)
 
 ## 效果
 
