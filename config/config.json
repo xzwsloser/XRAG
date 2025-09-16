@@ -1,6 +1,6 @@
 {
   "SiliconCloud": {
-    "LLM_API_KEY": "sk-wapshlrlkikawxhjuegfektfxxftdivddctosutckymdbjoo",
+    "LLM_API_KEY": "<YOUR_API_KEY>",
     "LLM_BASE_URL": "https://api.siliconflow.cn/v1",
     "CHAT_MODEL_NAME": "deepseek-ai/DeepSeek-V3",
     "EMBED_MODEL_NAME": "Qwen/Qwen3-Embedding-8B",
