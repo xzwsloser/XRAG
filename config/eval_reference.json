@@ -1,0 +1,22 @@
+[
+  {"query": "EasyRAG框架的主要贡献有哪三点？", "answer": "1. 问答准确：设计了基于两路稀疏检索粗排-LLM Reranker重排-LLM答案生成与优化的RAG方案及配套数据处理流程，在初赛GLM4赛道获第1，复赛GLM4赛道获第2。2. 部署简单：主要由bm25检索和bge-reranker重排组成，无需微调任何模型，占用显存少，部署容易，可扩展性强，提供灵活代码库，内置多种搜索和生成策略，方便自定义流程实现。3. 推理高效：设计粗排-重排-生成全流程高效推理加速方案，大幅降低RAG推理延迟且较好维持准确度，每个加速方案可即插即用至任意RAG流程相关组件，提升系统效率。"},
+  {"query": "EasyRAG框架的数据处理流程包括哪些部分？", "answer": "包括zedx文件处理、文本分块、图像信息抽取三部分。其中zedx文件处理步骤为：解压官方源数据4个.zedx文件得到4份html文档包；从文档包的nodetree.xml读取每个html文档的知识路径及实际存储文件路径；用BeautifulSoup抽取每个html的文本、图像标题和图像路径；保存文档文本为txt格式（与html文档相对位置一致），同时保存知识路径、文件路径与图像路径信息。文本分块使用SentenceSplitter，先按中文分隔符分割为句子，再按chunk-size=1024、chunk-overlap=200合并，且实现自定义分块类消除路径长度对分块结果的影响以保证稳定复现。图像信息抽取先使用GLM-4V-9B提取所有图像信息，再基于多种规则过滤无用图像，最终将图像数量从原始6000张减少到200张以内。"},
+  {"query": "EasyRAG框架中图像过滤的具体步骤是什么？", "answer": "1. 使用PP-OCRv4模型提取图像中的文字内容，过滤不含有中文的图像；2. 过滤标题中含有特别关键词（组网图、架构等）的图像；3. 过滤在文中以特定方式被引用的图像（配置如图x所示，文件如图x所示等）。"},
+  {"query": "EasyRAG框架的RAG流程包含哪些部分？", "answer": "包含查询改写、两路稀疏检索粗排、密集检索粗排、LLM Reranker重排、多路排序融合、LLM回答、LLM答案优化。其中查询改写分为查询扩展和假设文档嵌入（HyDE）两种方法；两路稀疏检索粗排采用BM25算法构建检索器，包括文本块检索和路径检索；密集检索粗排采用gte-Qwen2-7B-instruct模型；LLM Reranker重排采用bge-reranker-v2-minicpmlayerwise模型；多路排序融合有简单合并与倒数排序融合（RRF）两种策略；LLM回答使用特定模板拼接重排得到的top6文本块内容及问题生成提示词输入GLM4；LLM答案优化设计答案整合提示词，结合top1文本块对答案补充整合。"},
+  {"query": "在EasyRAG框架的查询扩展中，利用LLM进行关键词扩展的具体做法是什么？", "answer": "人工标注若干条数据中的关键词和可能联想的关键词后，利用LLM（GLM4）进行few-shots的关键词总结、扩展，参考（Wang et al., 2023），将扩展得到的关键词基于原始查询通过直接拼接、再次利用大语言模型总结两种方式生成新的查询。"},
+  {"query": "EasyRAG框架中BM25检索器的中文分词器和停用词表分别采用什么？", "answer": "中文分词器采用jieba中文分词器，其优点是轻量级，可开启多线程模式加速分词和词性分析，可自定义词频或自定义词典调整分词偏好，曾尝试载入清华大学收集的IT领域词库，但实践效果一般，最终使用原始jieba词表；停用词表采用哈尔滨工业大学搜集的中文常见停用词表，用于过滤无意义词汇和特殊符号，提高有效关键词命中率和正确文档召回率。"},
+  {"query": "EasyRAG框架中BM25两路检索粗排具体指什么？", "answer": "1. 文本块检索：使用BM25对分割好的文本块进行搜索，粗排召回得分大于0的前192个文本块。2. 路径检索：考虑到部分问题与提取的知识路径相关性高，使用BM25对知识路径进行搜索，粗排召回得分大于0的前6个文本块。"},
+  {"query": "EasyRAG框架中密集检索粗排的检索流程是什么？", "answer": "1. 文档扩展：将文件路径和每个文本块拼接起来作为扩展文档用于检索。2. 文档编码：将所有文本块输入gte-Qwen2-7B-instruct模型进行编码得到表征，存入qdrant向量数据库。3. 查询编码：利用查询提示模板将查询q转换为GTE的查询输入，利用模型进行编码。4. 相似度召回：在检索时，使用余弦相似度进行匹配，召回前288个文本块。5. 文件路径过滤：利用赛题中的文件路径来源，使用qdrant-filter过滤掉其他来源的文本块。"},
+  {"query": "EasyRAG框架中LLM Reranker重排的重排流程是什么？", "answer": "1. 文档扩展：将知识路径和每个文本块拼接起来作为扩展文档用于检索。2. 文本处理：将查询q和k'个粗排得到的文本块分别组合成k'个查询-文档对，输入分词器得到LLM的输入数据。3. 相似度排序：将输入数据输入bge-reranker-v2-minicpmlayerwise模型得到查询和每个文本块的重排分数，根据此分数进行排序，取最高的k（一般为6）个文本块返回。"},
+  {"query": "根据表4，复赛中不同生成虚假文档方法的准确度分别是多少？", "answer": "原始方法准确度为92.7，粗排+HyDE方法准确度为89.2，rerank+HyDE方法准确度为88.2。"},
+  {"query": "根据表6，测试集上BM25Okapi和BM25s的时间及准确度分别是多少？", "answer": "BM25Okapi的时间为17s（103个问题和BM25相关的总搜索时间），准确度为94.49；BM25s的时间为0.05s（103个问题和BM25相关的总搜索时间），准确度为94.24。"},
+  {"query": "EasyRAG框架RAG流程中LLM回答使用的文本块与粗排、重排过程中的文本块有何不同？", "answer": "LLM回答中输入GLM4的文本块是将图像的内容拼接后的，而粗排和重排过程中的文本块都没有拼接图像内容。"},
+  {"query": "EasyRAG框架中LLM答案优化的设计思路是什么？", "answer": "由于发现LLM对每个文本块都会给予一定注意力，可能导致top1文本块的有效信息未得到充分利用，因此设计答案整合提示词，将根据6个文本块得到的答案利用top1文本块进行补充整合，得到最终答案。"},
+  {"query": "EasyRAG框架在资源消耗方面有何特点？", "answer": "RAG流程中只有Reranker需要消耗显存，开启bfloat16时，模型加载仅需消耗5G显存，默认批大小32时，推理占用的显存开销总共为12G；曾尝试8bit量化与剪枝等模型压缩算法，但减少一定显存的同时效果下降明显。"},
+  {"query": "EasyRAG框架在部署难度方面有何优势？", "answer": "RAG框架封装为一个流程类，方便直接加载和使用，可一键部署，提供docker部署脚本（docker大小仅为28G左右），还提供基于FastAPI的API部署脚本和基于Streamlit的WebUI，使用方便。"},
+  {"query": "EasyRAG框架中设计的基于最大相似度选择的模型早退算法具体是怎样的？", "answer": "对于每个query，查看第一个批内第12层输出的softmax相似度中是否含有大于某个阈值的数值，如果有则此query直接使用12层进行推理，否则使用28层。该方法在降低33%推理时间的同时，基本能够维持排序结果与直接使用28层一致，超越了熵选择方法。"},
+  {"query": "图 1 中 EasyRAG 框架的 Ingestion 阶段，对 image content 的处理流程是怎样的？", "answer": "在 Ingestion 阶段，先通过 paddleocr、word rule、sentence rule 组成的 Filter 对 image 进行过滤得到 filtered images，然后将 filtered images 输入 glm4v-9b-chat 生成 describe，进而得到 image content，之后 image content 用于 LLM Context Embed。"},
+  {"query": "根据图 1，EasyRAG 阶段中，从 question 到最终生成 Ans 的大致流程是怎样的？", "answer": "首先对 question 进行 query rewrite，然后通过 bm25 进行 chunk retrieval 和 path retrieval 得到相关 chunks，再经 bge-reranker-v2-minicpm 重排得到部分 chunks，将这些 chunks 与 query 一起输入 GLM-4 生成 Ans'，最后 GLM-4 对 Ans' 进行 refine 得到 Ans。"},
+  {"query": "图 2 中，query 首先输入到哪个模块？", "answer": "query 首先输入到 GLM4 模块，同时也会进入 retrieve stage。"},
+  {"query": "在图 2 的虚拟文档生成流程里，hypothetical document v2 是如何得到的？", "answer": "hypothetical document v1 与 top1 chunk 结合形成 prompt2，然后将 prompt2 输入 GLM4，从而得到 hypothetical document v2。"}
+]

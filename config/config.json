@@ -1,0 +1,10 @@
+{
+  "SiliconCloud": {
+    "LLM_API_KEY": "sk-wapshlrlkikawxhjuegfektfxxftdivddctosutckymdbjoo",
+    "LLM_BASE_URL": "https://api.siliconflow.cn/v1",
+    "CHAT_MODEL_NAME": "deepseek-ai/DeepSeek-V3",
+    "EMBED_MODEL_NAME": "Qwen/Qwen3-Embedding-8B",
+    "VLM_MODEL_NAME": "Qwen/Qwen2.5-VL-32B-Instruct",
+    "RERANK_MODEL_NAME": "Pro/BAAI/bge-reranker-v2-m3"
+  }
+}
